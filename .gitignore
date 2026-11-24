@@ -1,0 +1,23 @@
+# Secrets: never commit (holds DATABASE_URL)
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
