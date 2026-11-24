@@ -5,7 +5,7 @@ A small Google-Docs-style editor: create and edit rich-text documents, import fi
 ## Shape
 
 ```
-Browser ── Next.js (Netlify) ─ /api/* rewrite ──▶ FastAPI (Render) ──▶ Postgres (Neon)
+Browser ── Next.js (Vercel) ── /api/* rewrite ──▶ FastAPI (Vercel) ──▶ Postgres (Neon)
            TipTap editor                         access checks,
            autosave + polling                    sanitizing, import
 ```
@@ -15,7 +15,7 @@ Browser ── Next.js (Netlify) ─ /api/* rewrite ──▶ FastAPI (Render) �
 
 | Environment | Database | Where its URL lives |
 |---|---|---|
-| Production | Neon `main` branch | Render settings |
+| Production | Neon `main` branch | Vercel project settings |
 | Local development | Neon `dev` branch | `backend/.env`, never committed |
 | Tests | Disposable Postgres in Docker on localhost | The tests refuse any non-local host |
 
@@ -148,9 +148,9 @@ We use **optimistic concurrency**, with no live merging:
 |---|---|---|
 | Connection drops while editing | "Offline, retrying" with growing delays; warns before closing the tab with unsaved edits | Handled |
 | Browser crash / tab killed with unsaved edits | Unsaved content is mirrored to `localStorage`; on reopen: "Restore unsaved changes?" | Handled |
-| API asleep on Render free tier (30–60 s cold start) | First load shows "Waking up the server…" and retries | Handled |
+| API cold start or proxy timeout | First load shows "Waking up the server…" and retries | Handled |
 | Neon closes idle connections | `pool_pre_ping` reconnects | Handled |
-| Migration fails during deploy | The start command fails; Render keeps the previous version live | Known behaviour |
+| Schema change needed in production | Migrations are run by hand (`alembic upgrade head`) before deploying code that needs them; Vercel has no start command | Known behaviour |
 
 ### Sharing
 | Case | Behaviour |
@@ -187,13 +187,17 @@ We use **optimistic concurrency**, with no live merging:
 
 | Piece | Host | Notes |
 |---|---|---|
-| Frontend | Netlify (free) | Env: `BACKEND_URL` |
-| API | Render (free web service) | Env: `DATABASE_URL`. It sleeps when idle, so the first request takes ~30–60 s |
-| Database | Neon Postgres (free) | Persistent, so reviewers' documents survive the API sleeping |
+| Frontend | Vercel Hobby, `frontend` service (Next.js) | Serves every path except `/api/*` |
+| API | Vercel Hobby, `backend` service (FastAPI on Python Functions) | Serves `/api/*`; receives the full path. Env: `DATABASE_URL` (Neon pooled string). No card needed; no idle sleep |
+| Database | Neon Postgres (free) | Persistent; the only place state lives |
 
-Each deploy runs Render's start command, `alembic upgrade head && uvicorn …`:
+One Vercel project using **Services** (`vercel.json` at the repo root): `/api/*` is routed to the FastAPI service and everything else to Next.js, on one domain, so there is no CORS and no proxy hop. Locally, `next.config.ts` rewrites `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`) to get the same single-origin setup.
+
+**Migrations** are applied with `alembic upgrade head` from a developer machine, with explicit approval, before deploying code that needs them:
 - **Migration 1** creates the tables.
 - **Migration 2** seeds the demo users and the shared welcome document.
+
+**Trade-off of serverless:** presence ("Bob is here") is kept in process memory, so with several function instances it can occasionally miss someone. Documents, sharing and conflict detection all live in Postgres and are unaffected. Fix if needed: a small `presence` table.
 
 The API never creates tables itself.
 

@@ -82,9 +82,8 @@ Status key: `[ ]` not started · `[~]` in progress · `[x]` done and verified
 (Phase 4 is now ~60 min. If time is short, cut the `localStorage` backup first.)
 
 ## Phase 5: Deploy (~30 min)
-- [x] Neon database created and migrated to `0002 (head)` on 2026-11-24 (by the user; the URL goes into Render's environment settings, never into the repo or chat)
-- [ ] API on Render (`DATABASE_URL`); start command `alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT`. This is the first migration against production, so confirm with the user first.
-- [ ] Frontend on Netlify (base directory `frontend`, env `BACKEND_URL`)
+- [x] Neon database created and migrated to `0002 (head)` on 2026-11-24 (by the user; the URL goes into the API project's environment settings, never into the repo or chat)
+- [ ] One Vercel project with Services (`vercel.json`: `/api/*` → FastAPI, `/` → Next.js); env `DATABASE_URL`; migrations already at head on Neon
 
 **Done when:** the full two-user flow works on the live URLs.
 
