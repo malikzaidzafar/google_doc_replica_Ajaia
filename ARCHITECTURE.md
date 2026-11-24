@@ -5,7 +5,7 @@ A small Google-Docs-style editor: create and edit rich-text documents, import fi
 ## Shape
 
 ```
-Browser ── Next.js (Vercel) ── /api/* rewrite ──▶ FastAPI (Render) ──▶ Postgres (Neon)
+Browser ── Next.js (Netlify) ─ /api/* rewrite ──▶ FastAPI (Render) ──▶ Postgres (Neon)
            TipTap editor                         access checks,
            autosave + polling                    sanitizing, import
 ```
@@ -187,7 +187,7 @@ We use **optimistic concurrency**, with no live merging:
 
 | Piece | Host | Notes |
 |---|---|---|
-| Frontend | Vercel (free) | Env: `BACKEND_URL` |
+| Frontend | Netlify (free) | Env: `BACKEND_URL` |
 | API | Render (free web service) | Env: `DATABASE_URL`. It sleeps when idle, so the first request takes ~30–60 s |
 | Database | Neon Postgres (free) | Persistent, so reviewers' documents survive the API sleeping |
 
