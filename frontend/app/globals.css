@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* Design tokens: one restrained accent (muted navy, change it here only), neutral zinc greys, soft layered shadows. */
+@theme {
+  /* Accent: muted navy. Every accent-* utility in the app comes from this scale. */
+  --color-accent-50: #f2f5f9;
+  --color-accent-100: #e3e9f1;
+  --color-accent-200: #c7d3e3;
+  --color-accent-300: #9fb2cc;
+  --color-accent-400: #6f89ad;
+  --color-accent-500: #4c6890;
+  --color-accent-600: #36507a;
+  --color-accent-700: #2b4064;
+  --color-accent-800: #233452;
+  --color-accent-900: #1c2940;
+  --color-accent-950: #121b2b;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-pop: 0 16px 40px -12px rgb(16 24 40 / 0.22), 0 4px 10px -4px rgb(16 24 40 / 0.08);
+  --shadow-page: 0 1px 2px rgb(16 24 40 / 0.05), 0 10px 30px -14px rgb(16 24 40 / 0.16);
+  --animate-fade-in: fade-in 160ms ease-out both;
+  --animate-pop-in: pop-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-down: slide-down 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+@keyframes slide-down { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes pulse-dot { 50% { opacity: 0.35; } }
+
+@layer base {
+  /* Tailwind v4 preflight gives buttons the default arrow; interactive things should say so. */
+  a[href], button:not(:disabled), [role="button"], select:not(:disabled), label[for], summary { cursor: pointer; }
+  button:disabled, select:disabled, input:disabled { cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--color-accent-500); outline-offset: 2px; }
+  ::selection { background: var(--color-accent-100); }
+  h1, h2, h3 { letter-spacing: -0.015em; }
+  dialog[open] { animation: pop-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  dialog::backdrop { background: rgb(15 23 42 / 0.35); backdrop-filter: blur(3px); animation: fade-in 160ms ease-out; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after, dialog::backdrop {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Document body (TipTap/ProseMirror). Preflight resets headings and lists, so restore a document look. */
+.doc-page { min-height: 55vh; outline: none; font-size: 1rem; line-height: 1.7; color: #27272a; caret-color: var(--color-accent-600); }
+.doc-page h1 { font-size: 1.875rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; margin: 1.5em 0 0.5em; color: #18181b; }
+.doc-page h2 { font-size: 1.375rem; font-weight: 650; line-height: 1.3; margin: 1.4em 0 0.4em; color: #18181b; }
+.doc-page h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; margin: 1.2em 0 0.3em; color: #18181b; }
+.doc-page p { margin: 0 0 0.75em; }
+.doc-page ul { list-style: disc; padding-left: 1.4rem; margin: 0.25em 0 0.9em; }
+.doc-page ol { list-style: decimal; padding-left: 1.4rem; margin: 0.25em 0 0.9em; }
+.doc-page li { padding-left: 0.2em; }
+.doc-page li::marker { color: #71717a; }
+.doc-page li p { margin: 0.15em 0; }
+.doc-page a { color: var(--color-accent-600); text-decoration: underline; text-underline-offset: 2px; }
+.doc-page blockquote { border-left: 3px solid #e4e4e7; padding: 0.1em 0 0.1em 1em; margin: 1em 0; color: #52525b; }
+.doc-page code { background: #f4f4f5; border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.875em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.doc-page pre { background: #18181b; color: #f4f4f5; border-radius: 8px; padding: 0.9em 1.1em; margin: 1em 0; overflow-x: auto; font-size: 0.85em; }
+.doc-page pre code { background: none; padding: 0; color: inherit; }
+.doc-page hr { border: 0; border-top: 1px solid #e4e4e7; margin: 1.5em 0; }
+.doc-page > :first-child { margin-top: 0; }
+/* Empty-document placeholder (ProseMirror renders an empty paragraph as <p><br class="ProseMirror-trailingBreak"></p>). */
+.doc-page[contenteditable="true"] > p:only-child:has(> br.ProseMirror-trailingBreak:only-child)::before {
+  content: "Start writing…";
+  color: #a1a1aa;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
